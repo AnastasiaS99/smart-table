@@ -13,11 +13,51 @@ export function initTable(settings, onAction) {
 
     // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
 
+     before.reverse().forEach((subName) => {
+    // перебираем массив идентификаторов
+    root[subName] = cloneTemplate(subName) // клонируем и получаем объект, сохраняем в таблице
+    root.container.prepend(root[subName].container) // добавляем к таблице после или до
+  })
+
+  after.forEach((subName) => {
+    // перебираем массив идентификаторов
+    root[subName] = cloneTemplate(subName) // клонируем и получаем объект, сохраняем в таблице
+    root.container.append(root[subName].container) // добавляем к таблице после или до 
+
+
     // @todo: #1.3 —  обработать события и вызвать onAction()
+
+      root.container.addEventListener("change", (e) => {
+      onAction(e.target)
+  })
+
+  root.container.addEventListener("reset", (e) => {
+    setTimeout(() => {
+      onAction()
+    }, 0)
+  })
+
+  root.container.addEventListener("submit", (e) => {
+    e.preventDefault()
+      onAction(e.submitter)
+  })
 
     const render = (data) => {
         // @todo: #1.1 — преобразовать данные в массив строк на основе шаблона rowTemplate
-        const nextRows = [];
+        const nextRows = data.map((item) => {
+           const row = cloneTemplate(rowTemplate)
+        row.elements.date.textContent = item.date
+        row.elements.customer.textContent = item.customer
+        row.elements.seller.textContent = item.seller
+        row.elements.total.textContent = item.total
+        return row.container
+        Object.keys(item).forEach((key) => {
+            if (row.elements.hasOwnProperty(key)) {
+            row.elements[key].textContent = item[key]
+        }
+      })
+    }) 
+        }
         root.elements.rows.replaceChildren(...nextRows);
     }
 
